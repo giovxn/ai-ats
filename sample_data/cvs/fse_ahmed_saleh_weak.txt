@@ -1,0 +1,37 @@
+CURRICULUM VITAE
+
+Ahmed Saleh
+Web Developer
+
+PERSONAL INFORMATION
+Date of Birth: 14/02/1999
+Nationality: Egyptian
+Gender: Male
+Marital Status: Single
+Visa Status: Visit visa
+Email: ahmed.saleh@example.com
+Mobile: +971 55 000 0004
+
+CAREER OBJECTIVE
+To obtain a challenging position in a reputed organization where I can use my skills and grow with the company.
+
+WORK EXPERIENCE
+
+Freelance Web Developer (2022 - Present)
+- Built and maintained more than 15 WordPress websites for local shops and clinics
+- Customised PHP themes and plugins, added jQuery sliders and contact forms
+
+Web Designer, Pixelhouse Media, Cairo (2020 - 2022)
+- Designed website layouts in Photoshop and converted them to HTML and CSS
+
+EDUCATION
+Bachelor of Commerce, Cairo University, 2020
+
+SKILLS
+WordPress, PHP, HTML, CSS, jQuery, Photoshop, SEO basics, MS Office
+
+LANGUAGES
+Arabic, English
+
+DECLARATION
+I hereby declare that the above information is true to the best of my knowledge.

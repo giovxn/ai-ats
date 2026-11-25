@@ -1,0 +1,38 @@
+Nadia Rahman
+Full-Stack Developer (formerly Chartered Accountant)
+Dubai, UAE | nadia.rahman@example.com | linkedin.com/in/example-nr
+
+Profile
+I spent six years in audit and accounting before retraining as a developer. I now build
+fintech features in Python and React, and I bring a finance background that helps me
+understand what accountants actually need from software.
+
+Experience
+
+Junior Full-Stack Developer — Ledgerly, Dubai
+April 2023 to present
+* Build reconciliation features with FastAPI, React and PostgreSQL
+* Wrote the bank-statement import service (CSV and MT940), now used by 900 businesses
+* Pair with senior engineers on code reviews and on-call
+
+Full-Stack Web Development Bootcamp — CodeHarbour Academy, Dubai
+September 2022 to February 2023 (full time)
+* 24-week programme: JavaScript, React, Python, SQL, Git
+* Final project: an expense-splitting app built with Flask and React
+
+Senior Auditor — Marlow & Pike Chartered Accountants, Dubai
+September 2016 to August 2022
+* Led audits of 12 trading and real-estate clients under IFRS
+* Built Excel and VBA tools that cut audit sampling time by half
+
+Education
+BSc Accounting and Finance, University of Manchester, 2016
+
+Certifications
+ACCA (Fellow), 2019
+
+Skills
+Python, FastAPI, React, JavaScript, TypeScript (learning), PostgreSQL, Git, Docker (basic), Excel, VBA, IFRS
+
+Languages
+English (native), Bengali (fluent), Arabic (basic)

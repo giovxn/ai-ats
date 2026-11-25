@@ -1,0 +1,33 @@
+LAYLA HADDAD
+Senior Software Engineer · Dubai, UAE
+layla.haddad@example.com · +971 50 000 0001 · github.com/example-lh
+
+SUMMARY
+Full-stack engineer with 8 years of experience, most of it in fintech. I own features from the PostgreSQL schema to the React screen, and I care about simple, well-tested code.
+
+EXPERIENCE
+Senior Software Engineer, PayNest (Dubai)                         Mar 2022 – Present
+- Lead engineer on merchant invoicing: React + TypeScript frontend, FastAPI backend
+- Cut invoice-list load time from 2.8s to 400ms by redesigning PostgreSQL indexes
+- Run the team's code reviews; introduced contract tests between the frontend and the API
+
+Software Engineer, Cedarline Labs (Beirut, remote)                Jun 2019 – Feb 2022
+- Built a Django REST API and React dashboard for a logistics client with 40k daily users
+- Moved deployments from hand-managed servers to AWS ECS with Docker and GitHub Actions
+- Mentored two junior developers
+
+Junior Developer, Cedarline Labs                                  Jul 2018 – May 2019
+- Wrote Python scripts and small Flask services for internal reporting
+
+EDUCATION
+BEng Computer and Communications Engineering, American University of Beirut, 2018
+
+SKILLS
+TypeScript, React, Next.js, Python, FastAPI, Django, Flask, PostgreSQL, Redis,
+AWS (ECS, RDS, S3), Docker, GitHub Actions, pytest, Jest
+
+LANGUAGES
+Arabic (native), English (fluent), French (conversational)
+
+OPEN SOURCE
+Maintainer of a small FastAPI pagination library (1.2k GitHub stars)
