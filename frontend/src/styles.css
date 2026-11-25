@@ -162,16 +162,17 @@ p {
   color: var(--color-text);
 }
 
-.button[aria-disabled="true"] {
+.button[aria-disabled="true"],
+.button:disabled {
   opacity: 0.6;
   cursor: progress;
 }
 
 @media (hover: hover) {
-  .button-primary:not([aria-disabled="true"]):hover {
+  .button-primary:not([aria-disabled="true"], :disabled):hover {
     background: var(--color-accent-solid-hover);
   }
-  .button-secondary:not([aria-disabled="true"]):hover {
+  .button-secondary:not([aria-disabled="true"], :disabled):hover {
     background: var(--color-surface-sunken);
   }
 }
@@ -180,7 +181,7 @@ p {
   .button {
     transition: background-color 150ms ease, scale 150ms ease-out;
   }
-  .button:not([aria-disabled="true"]):active {
+  .button:not([aria-disabled="true"], :disabled):active {
     scale: 0.96;
   }
 }

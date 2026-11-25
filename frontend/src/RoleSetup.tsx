@@ -57,8 +57,22 @@ export default function RoleSetup({ open, onClose, onCreated }: Props) {
     }
   }
 
+  // While the request runs it can't be cancelled: the backend still finishes the
+  // OpenAI call and saves the role. So the dialog stays open until it's done,
+  // instead of a Cancel that hides the dialog and the role appears anyway.
+  function blockCloseWhileSubmitting(event: React.SyntheticEvent) {
+    if (submitting) event.preventDefault()
+  }
+
   return (
-    <dialog ref={dialogRef} className="dialog" aria-labelledby="new-role-title" onClose={onClose}>
+    <dialog
+      ref={dialogRef}
+      className="dialog"
+      aria-labelledby="new-role-title"
+      onClose={onClose}
+      onCancel={blockCloseWhileSubmitting}
+      onKeyDown={(e) => e.key === 'Escape' && blockCloseWhileSubmitting(e)}
+    >
       <form onSubmit={handleSubmit} noValidate>
         <h2 id="new-role-title" className="dialog-title">New role</h2>
 
@@ -83,7 +97,12 @@ export default function RoleSetup({ open, onClose, onCreated }: Props) {
         )}
 
         <div className="dialog-actions">
-          <button type="button" className="button button-secondary" onClick={onClose}>
+          <button
+            type="button"
+            className="button button-secondary"
+            onClick={onClose}
+            disabled={submitting}
+          >
             Cancel
           </button>
           <button
