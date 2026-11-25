@@ -30,6 +30,21 @@ export default function RoleHeader({ role }: { role: Role }) {
       <div className="req-groups">
         <RequirementGroup label="Must-have" items={mustHave} />
         <RequirementGroup label="Nice to have" items={niceToHave} />
+        {role.excluded_criteria.length > 0 && (
+          <div className="req-group">
+            <h3 className="req-label">
+              Not used for screening <span className="req-count">{role.excluded_criteria.length}</span>
+            </h3>
+            <p className="req-hint">
+              These are about who someone is, not what they can do, so they weren't added as requirements.
+            </p>
+            <ul className="chips">
+              {role.excluded_criteria.map((text, index) => (
+                <li key={index} className="chip chip-excluded">{text}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <details className="jd">

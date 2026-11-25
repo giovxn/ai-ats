@@ -30,6 +30,8 @@ def create_role(body: RoleCreate) -> Role:
             status_code=422,
             detail="This doesn't look like a job description. Paste the full posting and try again.",
         )
+    # Drop empty or punctuation-only items the model sometimes returns (seen: ["."]).
+    extracted.excluded_criteria = [c.strip() for c in extracted.excluded_criteria if any(ch.isalnum() for ch in c)]
     return db.create_role(body.description, extracted)
 
 

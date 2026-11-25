@@ -22,6 +22,7 @@ class RoleExtraction(BaseModel):
     title: str
     location: str | None
     requirements: list[Requirement]
+    excluded_criteria: list[str]  # e.g. "Male candidates only": flagged to the recruiter, never used
 
 
 class Job(BaseModel):
@@ -64,6 +65,7 @@ class Role(BaseModel):
     title: str
     location: str | None
     requirements: list[Requirement]
+    excluded_criteria: list[str]
     description: str
     created_at: str
 

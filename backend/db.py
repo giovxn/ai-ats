@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS roles (
     title        TEXT NOT NULL,
     location     TEXT,
     requirements TEXT NOT NULL,  -- JSON: [{"text": ..., "must_have": ...}]
+    excluded_criteria TEXT NOT NULL DEFAULT '[]',  -- JSON: discriminatory criteria found in the ad, not used
     description  TEXT NOT NULL,  -- the original pasted job description
     created_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -65,20 +66,30 @@ def get_db():
 def init_db() -> None:
     with get_db() as conn:
         conn.executescript(SCHEMA)
+        # Databases created before excluded_criteria existed get the column added.
+        columns = [row["name"] for row in conn.execute("PRAGMA table_info(roles)")]
+        if "excluded_criteria" not in columns:
+            conn.execute("ALTER TABLE roles ADD COLUMN excluded_criteria TEXT NOT NULL DEFAULT '[]'")
 
 
 # ---------- roles ----------
 
 def _row_to_role(row: sqlite3.Row) -> Role:
-    return Role(**{**dict(row), "requirements": json.loads(row["requirements"])})
+    return Role(**{
+        **dict(row),
+        "requirements": json.loads(row["requirements"]),
+        "excluded_criteria": json.loads(row["excluded_criteria"]),
+    })
 
 
 def create_role(description: str, extracted: RoleExtraction) -> Role:
     requirements = json.dumps([r.model_dump() for r in extracted.requirements])
     with get_db() as conn:
         cursor = conn.execute(
-            "INSERT INTO roles (title, location, requirements, description) VALUES (?, ?, ?, ?)",
-            (extracted.title, extracted.location, requirements, description),
+            "INSERT INTO roles (title, location, requirements, excluded_criteria, description)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (extracted.title, extracted.location, requirements,
+             json.dumps(extracted.excluded_criteria), description),
         )
         row = conn.execute("SELECT * FROM roles WHERE id = ?", (cursor.lastrowid,)).fetchone()
     return _row_to_role(row)

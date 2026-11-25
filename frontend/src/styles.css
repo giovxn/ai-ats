@@ -274,6 +274,20 @@ p {
   line-height: 1.4;
 }
 
+.req-hint {
+  max-width: 70ch;
+  margin-block: -4px 8px;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Flagged, not used: outlined instead of filled, so it never reads as a requirement. */
+.chip-excluded {
+  background: transparent;
+  border: 1px dashed var(--color-border-input);
+  color: var(--color-text-secondary);
+}
+
 .jd {
   margin-block-start: 24px;
 }

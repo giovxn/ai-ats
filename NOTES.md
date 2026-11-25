@@ -34,6 +34,13 @@ A running log of decisions, cuts, AI risks and ideas, updated after each block.
 - **The parsing prompt only extracts.** It never rates the candidate or compares them with the role. That kind of judgement is a separate AI feature (Block 4), and mixing it into parsing would make both harder to check.
 - **`stage` already exists on candidates (default `new`)**, so Block 3 moves candidates without a database change.
 
+**Discriminatory criteria in job ads (drop and flag)**
+- **Gulf job ads often ask for a gender, age range or nationality** ("Male candidates only, age 25 to 35, Indian / Pakistani preferred"). UAE labour law bans hiring on most of these, and an AI that copies them into requirements would quietly screen people out once candidates are matched against requirements.
+- **The role prompt puts them in `excluded_criteria`, never in requirements**, and the role page shows them under "Not used for screening". The recruiter still sees what the ad said; the app just won't act on it.
+- **Emiratisation is the exception:** "UAE Nationals only" is lawful and stays a requirement.
+- **Why not hold the role for a person to approve:** that's a workflow (states, approvers) for a rare case. Dropping and flagging already keeps a person informed.
+- **Known limitation:** encouragements ("women are encouraged to apply") are sometimes flagged too. Harmless, because flagged items are never used. A code guard also drops empty or punctuation-only items the model once returned.
+
 **UI**
 - **Styling follows OVI, kept quiet.** Warm off-white neutrals, a system serif only for display headings, the black halftone logo as the one signature element, and black primary buttons. No web fonts to load.
 - **Native `<dialog>` for "New role".** You get focus trapping, Escape to close and a backdrop for free, with no modal library.

@@ -24,7 +24,13 @@ Extract:
   - Merge duplicates. Leave out benefits, perks and company descriptions.
   - Only include what the text actually says. Never invent requirements.
 
-If the text is not a job description, return an empty title and no requirements.
+- excluded_criteria: criteria about who the person is rather than what they can do: gender, age, nationality, ethnicity, religion, marital status, pregnancy or family plans, appearance or a photo. Copy each one short, in the posting's words (for example "Male candidates only", "Age 25 to 35"). Never put these in requirements: hiring on them is discriminatory and UAE labour law bans it.
+  - Exception: a role reserved for UAE nationals (Emiratisation) is lawful. Keep it as a requirement, not an excluded criterion.
+  - Work authorisation, a driving licence, languages and notice period are about the job, so they stay requirements.
+  - Only conditions placed on the candidate count. Equal-opportunity statements and lines that welcome or encourage a group to apply ("women are encouraged to apply") are not criteria.
+  - Use an empty list when there are none.
+
+If the text is not a job description, return an empty title, no requirements and no excluded criteria.
 """
 
 

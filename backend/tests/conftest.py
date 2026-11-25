@@ -35,6 +35,7 @@ def fake_llm(monkeypatch):
                 Requirement(text="ACCA, CPA or CA", must_have=True),
                 Requirement(text="NetSuite experience", must_have=False),
             ],
+            excluded_criteria=[],
         )
         cv_result = CVProfile(
             is_cv=True,

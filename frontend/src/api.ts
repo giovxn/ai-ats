@@ -7,6 +7,7 @@ export type Role = {
   title: string
   location: string | null
   requirements: Requirement[]
+  excluded_criteria: string[] // e.g. "Male candidates only": shown, never used
   description: string
   created_at: string
 }

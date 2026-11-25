@@ -46,7 +46,7 @@ def http_error(error_class, status):
 
 
 def test_returns_the_parsed_object(monkeypatch):
-    expected = RoleExtraction(title="Senior Accountant", location=None, requirements=[])
+    expected = RoleExtraction(title="Senior Accountant", location=None, requirements=[], excluded_criteria=[])
     fake_openai(monkeypatch, returns=expected)
 
     assert llm.extract("instructions", "text", RoleExtraction) == expected
@@ -60,7 +60,7 @@ def test_missing_api_key(monkeypatch):
 
 
 def test_client_has_a_timeout_and_one_retry(monkeypatch):
-    client = fake_openai(monkeypatch, returns=RoleExtraction(title="x", location=None, requirements=[]))
+    client = fake_openai(monkeypatch, returns=RoleExtraction(title="x", location=None, requirements=[], excluded_criteria=[]))
 
     llm.extract("instructions", "text", RoleExtraction)
 
