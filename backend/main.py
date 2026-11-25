@@ -9,7 +9,7 @@ import cvs
 import db
 import llm
 import prompts
-from schemas import Candidate, CVProfile, Role, RoleCreate, RoleExtraction
+from schemas import Candidate, CVProfile, Role, RoleCreate, RoleExtraction, StageUpdate
 
 app = FastAPI(title="OVI ATS")
 db.init_db()
@@ -99,6 +99,17 @@ def list_candidates(role_id: int) -> list[Candidate]:
 @app.get("/api/candidates/{candidate_id}")
 def get_candidate(candidate_id: int) -> Candidate:
     candidate = db.get_candidate(candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=404, detail="Candidate not found.")
+    return candidate
+
+
+# ---------- Block 3: pipeline ----------
+
+@app.patch("/api/candidates/{candidate_id}")
+def move_candidate(candidate_id: int, body: StageUpdate) -> Candidate:
+    """Move a candidate to another stage: {"stage": "shortlisted"}. Moving to the same stage is allowed."""
+    candidate = db.update_stage(candidate_id, body.stage)
     if candidate is None:
         raise HTTPException(status_code=404, detail="Candidate not found.")
     return candidate

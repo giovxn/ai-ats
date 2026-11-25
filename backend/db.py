@@ -9,7 +9,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-from schemas import Candidate, CVProfile, Role, RoleExtraction
+from schemas import Candidate, CVProfile, Role, RoleExtraction, Stage
 
 DB_PATH = Path(__file__).parent / "ats.db"
 
@@ -169,5 +169,13 @@ def list_candidates(role_id: int) -> list[Candidate]:
 
 def get_candidate(candidate_id: int) -> Candidate | None:
     with get_db() as conn:
+        row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+    return _row_to_candidate(row) if row else None
+
+
+def update_stage(candidate_id: int, stage: Stage) -> Candidate | None:
+    """Move a candidate to another stage. Returns None if there is no such candidate."""
+    with get_db() as conn:
+        conn.execute("UPDATE candidates SET stage = ? WHERE id = ?", (stage, candidate_id))
         row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
     return _row_to_candidate(row) if row else None

@@ -5,7 +5,7 @@ Two kinds live here:
 - API models: what the endpoints accept and return.
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, StringConstraints
 
@@ -70,10 +70,18 @@ class Role(BaseModel):
     created_at: str
 
 
+# The four pipeline stages. The database has the same list as a CHECK rule.
+Stage = Literal["new", "shortlisted", "interview", "rejected"]
+
+
+class StageUpdate(BaseModel):
+    stage: Stage  # anything else is rejected with 422 before the route runs
+
+
 class Candidate(BaseModel):
     id: int
     role_id: int
-    stage: str  # new, shortlisted, interview or rejected (moved in Block 3)
+    stage: Stage
     name: str | None
     current_title: str | None
     years_experience: float | None  # counted by cvs.total_years, not by the LLM
