@@ -5,7 +5,9 @@ Two kinds live here:
 - API models: what the endpoints accept and return.
 """
 
-from pydantic import BaseModel, Field
+from typing import Annotated
+
+from pydantic import BaseModel, StringConstraints
 
 
 # ---------- LLM outputs ----------
@@ -26,7 +28,8 @@ class RoleExtraction(BaseModel):
 
 class RoleCreate(BaseModel):
     # Bounds keep out empty submissions and very large pastes (cost and latency).
-    description: str = Field(min_length=50, max_length=20_000)
+    # Whitespace is stripped first, so padding can't sneak past the minimum.
+    description: Annotated[str, StringConstraints(strip_whitespace=True, min_length=50, max_length=20_000)]
 
 
 class Role(BaseModel):
