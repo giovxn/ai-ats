@@ -41,9 +41,10 @@ export default function App() {
 
         <div className="topbar-actions">
           {role && roles && (
-            <label className="role-picker">
-              <span className="role-picker-label">Role</span>
+            <div className="role-picker">
+              <label htmlFor="role-picker" className="role-picker-label">Role</label>
               <select
+                id="role-picker"
                 className="select"
                 value={role.id}
                 onChange={(e) => selectRole(Number(e.target.value))}
@@ -52,7 +53,7 @@ export default function App() {
                   <option key={r.id} value={r.id}>{r.title}</option>
                 ))}
               </select>
-            </label>
+            </div>
           )}
           {/* In the empty state, the page's own button is the one primary action. */}
           {role && (
