@@ -1,7 +1,8 @@
-// The one page of the ATS: header with role picker, the selected role, and (later) its pipeline.
+// The one page of the ATS: header with role picker, the selected role and its candidates.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api, type Role } from './api'
+import Candidates from './Candidates'
 import RoleHeader from './RoleHeader'
 import RoleSetup from './RoleSetup'
 
@@ -16,6 +17,7 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(roleIdFromUrl)
   const [creating, setCreating] = useState(false)
+  const newRoleButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     api.listRoles().then(setRoles).catch((err: Error) => setLoadError(err.message))
@@ -31,7 +33,14 @@ export default function App() {
   function handleCreated(newRole: Role) {
     setRoles((prev) => [newRole, ...(prev ?? [])])
     selectRole(newRole.id)
+    closeRoleSetup()
+  }
+
+  // The empty state's button disappears after the first role is created, so move
+  // focus to the header's button once the dialog has closed.
+  function closeRoleSetup() {
     setCreating(false)
+    requestAnimationFrame(() => newRoleButtonRef.current?.focus())
   }
 
   return (
@@ -57,7 +66,7 @@ export default function App() {
           )}
           {/* In the empty state, the page's own button is the one primary action. */}
           {role && (
-            <button className="button button-primary" onClick={() => setCreating(true)}>
+            <button ref={newRoleButtonRef} className="button button-primary" onClick={() => setCreating(true)}>
               New role
             </button>
           )}
@@ -80,11 +89,12 @@ export default function App() {
         )}
 
         {role && <RoleHeader role={role} />}
+        {role && <Candidates key={role.id} role={role} />}
       </main>
 
       <RoleSetup
         open={creating}
-        onClose={() => setCreating(false)}
+        onClose={closeRoleSetup}
         onCreated={handleCreated}
       />
     </>

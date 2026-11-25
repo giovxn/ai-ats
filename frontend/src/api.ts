@@ -11,6 +11,35 @@ export type Role = {
   created_at: string
 }
 
+export type Job = {
+  title: string
+  company: string | null
+  start: string | null // "YYYY-MM" or "YYYY"
+  end: string | null
+  is_current: boolean
+  highlights: string[]
+}
+
+export type Education = { qualification: string; institution: string | null; year: string | null }
+
+export type Stage = 'new' | 'shortlisted' | 'interview' | 'rejected'
+
+export type Candidate = {
+  id: number
+  role_id: number
+  stage: Stage
+  name: string | null
+  current_title: string | null
+  years_experience: number | null
+  skills: string[]
+  jobs: Job[]
+  education: Education[]
+  summary: string
+  cv_filename: string
+  cv_text: string
+  created_at: string
+}
+
 // FastAPI errors are { detail: string } for our own errors,
 // or { detail: [{ msg }] } for request validation errors.
 function errorMessage(body: unknown, status: number): string {
@@ -42,4 +71,13 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description }),
     }),
+
+  listCandidates: (roleId: number) => request<Candidate[]>(`/roles/${roleId}/candidates`),
+
+  // One file per request; the browser sets the multipart Content-Type itself.
+  uploadCV: (roleId: number, file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return request<Candidate>(`/roles/${roleId}/candidates`, { method: 'POST', body: form })
+  },
 }
