@@ -1,0 +1,32 @@
+OMAR FAROUK
+Software Developer | Sharjah, UAE | omar.farouk@example.com
+
+PROFILE
+Self-taught developer returning to full-time work after a two-year career break caring for a family member. I build web apps end to end and have kept my skills current through freelance projects.
+
+KEY SKILLS AND ACHIEVEMENTS
+
+Frontend
+- Built React and TypeScript dashboards for three logistics clients
+- Rewrote a jQuery booking site in React, cutting page load time by half
+
+Backend and data
+- Designed REST APIs in Node.js and Python (Flask) backed by PostgreSQL and MongoDB
+- Wrote the data import that moved 1.2 million customer records into a new CRM
+
+Delivery
+- Led a team of three developers on a six-month fleet-tracking project
+- Set up automated tests and GitHub Actions deployments for every freelance client
+
+TECHNICAL SKILLS
+JavaScript, TypeScript, React, Node.js, Python, Flask, PostgreSQL, MongoDB, Docker, Git
+
+EMPLOYMENT HISTORY
+Freelance Web Developer
+Senior Developer, Raqmi Logistics Tech, Dubai
+Web Developer, Bluepixel Agency, Cairo (2015 - 2018)
+
+Career break (family care), 2023 - 2025
+
+EDUCATION
+Diploma in Information Technology, Cairo Higher Institute, 2014

@@ -19,6 +19,13 @@ Four CVs per role in `job_descriptions/`, from a strong fit to a weak one, in di
 | `ae_hassan_qureshi_career_switch.txt` | Account Executive | Career switcher: ICU nurse to medical sales | Healthcare knowledge, little SaaS |
 | `ae_emily_carter_weak.pdf` | Account Executive | Weak: junior SDR in the US | Short CV, US Letter page |
 
+Extra formats, added after researching common CV layouts:
+
+| File | Role | Intended fit | What it tests |
+|---|---|---|---|
+| `fse_tomas_ribeiro_europass.pdf` | Full-Stack Engineer | Strong-to-partial: Python and payments, light React, relocating | EU Europass layout: dates as `dd/mm/yyyy` (some split over two lines), an internship, a CEFR language table, running header and footer, date of birth and gender (must not be extracted) |
+| `fse_omar_farouk_functional.txt` | Full-Stack Engineer | Partial: right skills, unclear history | Functional (skills-first) CV: achievements grouped by skill, two jobs with no dates, a labelled career break (not a job). Years of experience can only count the one dated job |
+
 `edge_cases/` holds files that must be rejected with a clear message:
 
 | File | Expected result |
