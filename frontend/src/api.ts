@@ -25,6 +25,14 @@ export type Education = { qualification: string; institution: string | null; yea
 
 export type Stage = 'new' | 'shortlisted' | 'interview' | 'rejected'
 
+// The pipeline's columns, in order. Same four stages as schemas.Stage in the backend.
+export const STAGES: { id: Stage; label: string }[] = [
+  { id: 'new', label: 'New' },
+  { id: 'shortlisted', label: 'Shortlisted' },
+  { id: 'interview', label: 'Interview' },
+  { id: 'rejected', label: 'Rejected' },
+]
+
 export type Candidate = {
   id: number
   role_id: number
@@ -38,6 +46,10 @@ export type Candidate = {
   summary: string
   cv_filename: string
   cv_text: string
+  // Found in the CV text by code, not by the AI.
+  email: string | null
+  phone: string | null
+  links: string[] // LinkedIn, GitHub, a portfolio...
   created_at: string
 }
 
@@ -81,4 +93,11 @@ export const api = {
     form.append('file', file)
     return request<Candidate>(`/roles/${roleId}/candidates`, { method: 'POST', body: form })
   },
+
+  moveCandidate: (id: number, stage: Stage) =>
+    request<Candidate>(`/candidates/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage }),
+    }),
 }

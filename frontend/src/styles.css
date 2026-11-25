@@ -18,6 +18,17 @@
   --color-danger: #b3261e;
   --color-focus: #1c1a17;
 
+  /* Pipeline stages: a soft column tint and a dot, from the same warm palette.
+     Measured: secondary text >= 4.61:1 on every tint, dots >= 3:1 on their tint. */
+  --stage-new-bg: #ece7df;
+  --stage-new-dot: #8c8478;
+  --stage-shortlisted-bg: #e6eadb;
+  --stage-shortlisted-dot: #6b8f4e;
+  --stage-interview-bg: #e2e7ec;
+  --stage-interview-dot: #56789b;
+  --stage-rejected-bg: #efe2dd;
+  --stage-rejected-dot: #b0614f;
+
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: ui-serif, "New York", Georgia, serif;
 
@@ -122,16 +133,30 @@ p {
   color: var(--color-text-secondary);
 }
 
+/* Our own chevron, so it sits 12px from the edge instead of against it. */
 .select {
   min-height: 36px;
   min-width: 0;
   max-width: 260px;
-  padding: 0 12px;
+  padding-block: 0;
+  padding-inline: 12px 36px;
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background-color: var(--color-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%236b645a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
   color: inherit;
   font: inherit;
+  appearance: none;
+}
+
+/* High-contrast mode hides background images, so give the native arrow back. */
+@media (forced-colors: active) {
+  .select {
+    padding-inline-end: 12px;
+    appearance: auto;
+  }
 }
 
 /* ---------- Buttons ---------- */
@@ -429,21 +454,134 @@ p {
   margin: 0;
 }
 
-.candidate-grid {
+/* ---------- Pipeline board (Block 3) ----------
+   4 columns on a laptop, 2 x 2 on a tablet, stacked on a phone: no sideways scrolling. */
+.board {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 600px) {
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Room to drop a card into an empty column. Phones can't drag, so they don't need it. */
+  .column {
+    min-height: 160px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .board {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* lets one-line card text truncate instead of widening the column */
+  align-content: start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid transparent; /* keeps an edge in forced-colors mode */
+  border-radius: calc(var(--radius-md) + 10px); /* card radius + padding, so the corners nest */
+  background: var(--stage-bg);
+}
+
+[data-stage="new"] { --stage-bg: var(--stage-new-bg); --stage-dot: var(--stage-new-dot); }
+[data-stage="shortlisted"] { --stage-bg: var(--stage-shortlisted-bg); --stage-dot: var(--stage-shortlisted-dot); }
+[data-stage="interview"] { --stage-bg: var(--stage-interview-bg); --stage-dot: var(--stage-interview-dot); }
+[data-stage="rejected"] { --stage-bg: var(--stage-rejected-bg); --stage-dot: var(--stage-rejected-dot); }
+
+.stage-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: 6px;
+  border-radius: 50%;
+  background: var(--stage-dot);
+  vertical-align: 1px;
+}
+
+.column.is-drop-target {
+  outline: 2px dashed var(--color-border-input);
+  outline-offset: -2px;
+}
+
+.column-title {
+  padding: 2px 4px 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.column-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Long columns scroll inside themselves, so 200 candidates don't make an endless page.
+   The 4px padding keeps focus rings and shadows from being clipped. */
+@media (min-width: 600px) {
+  .column-cards {
+    max-height: 65dvh;
+    margin: -4px;
+    padding: 4px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.column-empty {
+  padding: 0 4px;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+.show-more {
+  width: 100%;
+  min-height: 32px;
+  font-size: var(--text-caption);
+}
+
+.candidate-card.is-dragging {
+  opacity: 0.5;
+}
+
+/* Small, and above the card's stretched click area, so using it doesn't open the profile. */
+.stage-select {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  field-sizing: content; /* as wide as the chosen stage, not the longest one */
+  min-height: 28px;
+  padding-inline: 8px 26px;
+  background-position: right 8px center;
+  font-size: var(--text-caption);
+}
+
+/* 16px on touch screens stops iOS from zooming the page when a select is used. */
+@media (pointer: coarse) {
+  .select {
+    font-size: 1rem;
+  }
+}
+
 .candidate-card {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
-  gap: 8px;
-  padding: 16px;
+  gap: 2px;
+  padding: 10px 12px 12px;
   border: 1px solid transparent; /* keeps an edge in forced-colors mode */
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -452,6 +590,10 @@ p {
 
 /* The name button's ::after covers the card, so the whole card opens the profile. */
 .candidate-open {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis; /* the full name is in the profile */
+  white-space: nowrap;
   padding: 0;
   border: 0;
   background: none;
@@ -491,14 +633,28 @@ p {
   }
 }
 
+/* One line each; anything cut off is in the profile. */
 .candidate-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--text-caption);
+}
+
+.candidate-meta {
   color: var(--color-text-secondary);
 }
 
-.chip-more {
-  background: none;
-  color: var(--color-text-secondary);
+.card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 4px;
+}
+
+.card-bottom .candidate-meta {
+  flex: 1;
+  min-width: 0;
 }
 
 /* ---------- Upload dialog ---------- */
@@ -642,6 +798,116 @@ p {
 .profile-meta {
   margin-block-start: 4px;
   color: var(--color-text-secondary);
+}
+
+.stage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 16px;
+}
+
+.stage-button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-input);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-caption);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stage-button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.profile-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow-wrap: anywhere; /* a long email still fits on a phone */
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border-input);
+  border-radius: 999px;
+  color: var(--color-text);
+  font-size: var(--text-caption);
+  text-decoration: none;
+}
+
+/* Copy chips are buttons styled like the link chips. */
+button.link-chip {
+  background: none;
+  font: inherit;
+  font-size: var(--text-caption);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.link-chip.is-copied {
+  border-color: var(--stage-shortlisted-dot);
+  color: var(--color-text);
+}
+
+.link-chip.is-copied svg {
+  color: var(--stage-shortlisted-dot);
+}
+
+.link-chip.is-failed {
+  border-color: var(--color-danger);
+}
+
+.copy-error {
+  display: block;
+  margin-block-start: 4px;
+  font-size: var(--text-caption);
+  color: var(--color-danger);
+}
+
+.link-icon {
+  flex-shrink: 0;
+  justify-content: center;
+  width: 28px;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+
+@media (hover: hover) {
+  .link-chip:hover {
+    background: var(--color-surface-sunken);
+  }
+}
+
+.stage-button[aria-pressed="true"] {
+  border-color: var(--color-accent-solid);
+  background: var(--color-accent-solid);
+  color: var(--color-text-on-accent);
+}
+
+@media (hover: hover) {
+  .stage-button:not([aria-pressed="true"]):hover {
+    background: var(--color-surface-sunken);
+  }
 }
 
 .profile-summary {
