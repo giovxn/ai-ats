@@ -1,0 +1,18 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+
+# Local database
+*.db
+
+# Node
+node_modules/
+dist/
+
+# OS / tools
+.DS_Store
+graphify-out/
