@@ -114,3 +114,55 @@ def test_jobs_without_usable_dates_are_skipped():
 
 def test_future_end_dates_stop_at_today():
     assert cvs.total_years([job("2026-01", "2027-12")], TODAY) == round(11 / 12, 1)
+
+
+# ---------- links ----------
+
+def test_finds_profile_links_and_full_urls():
+    text = """Layla Haddad · layla@example.com · github.com/example-lh
+    LinkedIn: https://www.linkedin.com/in/layla-h/ (updated). Portfolio: https://layla.dev.
+    Skills: Node.js, Next.js, FastAPI"""
+    assert cvs.find_links(text) == [
+        "https://github.com/example-lh",
+        "https://www.linkedin.com/in/layla-h/",
+        "https://layla.dev",
+    ]
+
+
+def test_email_addresses_and_bare_domains_are_not_links():
+    assert cvs.find_links("jane@github.com, jane@example.com, Node.js, example.com") == []
+
+
+def test_links_are_unique_and_capped():
+    text = " ".join(f"https://site{i}.dev" for i in range(8)) + " https://site0.dev"
+    assert cvs.find_links(text) == [f"https://site{i}.dev" for i in range(5)]
+
+
+# ---------- contact details ----------
+
+def test_finds_the_email():
+    assert cvs.find_email("Layla Haddad · layla.haddad@example.com · github.com/x") == "layla.haddad@example.com"
+    assert cvs.find_email("Write to me at jo+jobs@mail.example.co.uk.") == "jo+jobs@mail.example.co.uk"
+    assert cvs.find_email("No address here") is None
+
+
+@pytest.mark.parametrize(
+    ("text", "phone"),
+    [
+        ("Mobile: +971 55 000 0004", "+971 55 000 0004"),
+        ("Phone:\n(+351) 900 000 001\nEDUCATION", "(+351) 900 000 001"),
+        ("Call 050-123-4567 after 5pm", "050-123-4567"),
+        ("Dubai | +971 50 000 0001 · github.com/x", "+971 50 000 0001"),
+    ],
+)
+def test_finds_the_phone(text, phone):
+    assert cvs.find_phone(text) == phone
+
+
+def test_years_dates_and_numbers_are_not_phones():
+    text = "2016 – 2018, 01/03/2022 – Current, AED 60M turnover, 1.2 million records, +40%, 0.5 FTE"
+    assert cvs.find_phone(text) is None
+
+
+def test_a_phone_never_runs_into_the_next_line():
+    assert cvs.find_phone("+971 50 000 0001\n2019 – 2021") == "+971 50 000 0001"

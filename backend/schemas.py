@@ -91,4 +91,8 @@ class Candidate(BaseModel):
     summary: str
     cv_filename: str
     cv_text: str  # the text we extracted from the file, so a person can check the profile
+    # Found in cv_text by code (cvs.py), not by the AI, so a recruiter can contact and check the candidate.
+    email: str | None
+    phone: str | None
+    links: list[str]  # LinkedIn, GitHub, a portfolio...
     created_at: str

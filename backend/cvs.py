@@ -74,6 +74,52 @@ def fingerprint(text: str) -> str:
     return hashlib.sha256(normalised.encode()).hexdigest()
 
 
+# ---------- contact details and links ----------
+# Found by code in the CV text, not by the AI: free, can't be invented, and they
+# work for candidates uploaded before this existed.
+
+# Full web addresses, plus bare profile links CVs often use ("github.com/jdoe").
+# Not other bare domains: they'd catch "Node.js". Not emails: "@" before the domain.
+_LINK = re.compile(
+    r"(?<![@\w.-])(?:https?://[^\s<>\"'()|,;]+"
+    r"|(?:www\.)?(?:linkedin\.com|github\.com|gitlab\.com|behance\.net|dribbble\.com|medium\.com)/[^\s<>\"'()|,;]+)",
+    re.IGNORECASE,
+)
+
+
+def find_links(text: str) -> list[str]:
+    """Web links written in the CV (LinkedIn, GitHub, a portfolio), as https URLs. Found by code, not the AI."""
+    links: list[str] = []
+    for match in _LINK.findall(text):
+        url = match.rstrip(".")  # a link at the end of a sentence
+        if not url.lower().startswith(("http://", "https://")):
+            url = "https://" + url
+        if url not in links:
+            links.append(url)
+    return links[:5]
+
+
+_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+# International ("+971 50 000 0001", "(+351) 900 000 001") or local with a leading 0
+# ("050 123 4567"). Spaces and tabs only, so a number never runs into the next line.
+_PHONE = re.compile(r"(?:\(?\+\d{1,3}\)?|\b0\d)[\d \t().-]{6,18}\d")
+
+
+def find_email(text: str) -> str | None:
+    """The first email address in the CV, so a recruiter can contact the candidate."""
+    match = _EMAIL.search(text)
+    return match.group().rstrip(".") if match else None
+
+
+def find_phone(text: str) -> str | None:
+    """The first phone number in the CV: 9 to 15 digits, which rules out years and dates."""
+    for match in _PHONE.finditer(text):
+        digits = re.sub(r"\D", "", match.group())
+        if 9 <= len(digits) <= 15:
+            return " ".join(match.group().split())
+    return None
+
+
 # ---------- years of experience ----------
 
 _DATE = re.compile(r"^(\d{4})(?:-(\d{1,2}))?$")

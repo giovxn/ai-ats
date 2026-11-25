@@ -9,6 +9,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
+import cvs
 from schemas import Candidate, CVProfile, Role, RoleExtraction, Stage
 
 DB_PATH = Path(__file__).parent / "ats.db"
@@ -113,6 +114,10 @@ def _row_to_candidate(row: sqlite3.Row) -> Candidate:
     data = dict(row)
     for column in ("skills", "jobs", "education"):
         data[column] = json.loads(data[column])
+    # Worked out from the CV text on every read, so older candidates get them too.
+    data["email"] = cvs.find_email(data["cv_text"])
+    data["phone"] = cvs.find_phone(data["cv_text"])
+    data["links"] = cvs.find_links(data["cv_text"])
     return Candidate(**data)
 
 
