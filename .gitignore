@@ -16,3 +16,6 @@ dist/
 # OS / tools
 .DS_Store
 graphify-out/
+
+# Local Claude Code preview config
+.claude/
