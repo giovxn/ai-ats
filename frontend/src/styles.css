@@ -118,6 +118,32 @@ p {
   width: auto;
 }
 
+/* "× gio" next to the OVI mark. The wordmark is outlined shapes, so a light system sans at the
+   same x-height stands in for its font; 300 is fine at this size (over 18px). */
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo-collab {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 1.3rem;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #46423b; /* a step lighter than the black wordmark, so "ovi" leads (9.0:1 on the page) */
+  translate: 0 -2.25px; /* puts its baseline on the wordmark's (measured) */
+}
+
+.logo-times {
+  font-size: 0.85em;
+  color: var(--color-text-secondary);
+}
+
 /* Wraps under the logo on narrow screens instead of overflowing. */
 .topbar {
   flex-wrap: wrap;

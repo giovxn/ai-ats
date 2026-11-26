@@ -46,7 +46,13 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <img src="/ovi-logo.svg" alt="OVI" className="logo" width={57} height={28} />
+        {/* The OVI mark plus a light lowercase "× gio", sized and weighted to sit with "ovi". */}
+        <div className="logo-lockup" role="img" aria-label="OVI x Gio">
+          <img src="/ovi-logo.svg" alt="" className="logo" width={57} height={28} />
+          <span className="logo-collab" aria-hidden="true">
+            <span className="logo-times">×</span>gio
+          </span>
+        </div>
 
         <div className="topbar-actions">
           {role && roles && (
