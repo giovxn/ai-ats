@@ -2,6 +2,8 @@
 
 A one-page, AI-native applicant tracking system. Its twist, **Beyond the Scan**, makes sure a recruiter never rejects someone without seeing relevant experience outside the part of the CV they actually read.
 
+[Demo video (4:42)](https://drive.google.com/file/d/1t2sKdYOO2IhWdiJa9D-NzfCQUgASM9Bb/view?usp=sharing)
+
 <!-- Screenshot 1: Scan mode on Priya Raman, with the amber "Beyond the last 2 jobs" note -->
 
 ## What it does

@@ -110,7 +110,7 @@ To: tim@ovi-me.com, chris@ovi-me.com
 > Here's my case study ahead of the presentation:
 >
 > * Repo: https://github.com/giovxn/ai-ats (README covers setup, architecture and the prompts)
-> * Demo recording (4 min): [link]
+> * Demo recording (4:42): https://drive.google.com/file/d/1t2sKdYOO2IhWdiJa9D-NzfCQUgASM9Bb/view?usp=sharing
 >
 > The twist is Beyond the Scan, based on our interview: recruiters read the last two jobs of a long CV, so before a reject it surfaces must-have evidence that sits further down, with the exact quote. The demo runs without an API key via `reset_demo.py`.
 >
