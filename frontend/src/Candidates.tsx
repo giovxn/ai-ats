@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api, STAGES, type Candidate, type Role, type Stage } from './api'
 import CandidateProfile from './CandidateProfile'
 import { formatYears } from './format'
+import ScanMode from './ScanMode'
 import UploadCVs from './UploadCVs'
 
 // Each column shows this many cards, then a "Show more" button adds the next batch.
@@ -82,7 +83,10 @@ export default function Candidates({ role }: { role: Role }) {
   const [draggedId, setDraggedId] = useState<number | null>(null)
   const [dropStage, setDropStage] = useState<Stage | null>(null)
   const [shownPerStage, setShownPerStage] = useState<Partial<Record<Stage, number>>>({})
+  const [scanning, setScanning] = useState(false)
   const uploadButtonRef = useRef<HTMLButtonElement>(null)
+  // Where focus goes when the profile closes: its card on the board, or the button in Scan mode.
+  const profileReturnFocus = useRef<string | null>(null)
 
   useEffect(() => {
     api.listCandidates(role.id).then(setCandidates).catch((err: Error) => setLoadError(err.message))
@@ -123,6 +127,22 @@ export default function Candidates({ role }: { role: Role }) {
     setCandidates((prev) => [candidate, ...(prev ?? [])])
   }
 
+  // Scan mode saves its own changes (decisions, evidence checks) and hands back the result.
+  // A candidate that changed stage goes to the top of its new column, as with moveCandidate.
+  function handleScanUpdate(updated: Candidate) {
+    setCandidates((prev) => {
+      const list = prev ?? []
+      const before = list.find((c) => c.id === updated.id)
+      if (before && before.stage !== updated.stage) return [updated, ...list.filter((c) => c.id !== updated.id)]
+      return list.map((c) => (c.id === updated.id ? updated : c))
+    })
+  }
+
+  function openProfile(id: number, returnFocusTo: string) {
+    profileReturnFocus.current = returnFocusTo
+    setOpenId(id)
+  }
+
   function endDrag() {
     setDraggedId(null)
     setDropStage(null)
@@ -136,9 +156,14 @@ export default function Candidates({ role }: { role: Role }) {
         </h2>
         {/* In the empty state, the button below is the one primary action. */}
         {candidates && candidates.length > 0 && (
-          <button ref={uploadButtonRef} className="button button-secondary" onClick={() => setUploading(true)}>
-            Upload CVs
-          </button>
+          <div className="section-actions">
+            <button id="scan-open" className="button button-secondary" onClick={() => setScanning(true)}>
+              Scan mode
+            </button>
+            <button ref={uploadButtonRef} className="button button-secondary" onClick={() => setUploading(true)}>
+              Upload CVs
+            </button>
+          </div>
         )}
       </div>
 
@@ -193,7 +218,7 @@ export default function Candidates({ role }: { role: Role }) {
                         key={candidate.id}
                         candidate={candidate}
                         dragging={draggedId === candidate.id}
-                        onOpen={() => setOpenId(candidate.id)}
+                        onOpen={() => openProfile(candidate.id, `candidate-${candidate.id}`)}
                         onMove={(next) => {
                           moveCandidate(candidate.id, next)
                           focusSoon(`stage-${candidate.id}`)
@@ -225,6 +250,18 @@ export default function Candidates({ role }: { role: Role }) {
         </div>
       )}
 
+      {scanning && candidates && (
+        <ScanMode
+          candidates={candidates}
+          onClose={() => {
+            setScanning(false)
+            focusSoon('scan-open')
+          }}
+          onUpdate={handleScanUpdate}
+          onOpenProfile={(id) => openProfile(id, 'scan-profile')}
+        />
+      )}
+
       <UploadCVs
         roleId={role.id}
         open={uploading}
@@ -235,7 +272,7 @@ export default function Candidates({ role }: { role: Role }) {
         candidate={open}
         moveError={moveError}
         onClose={() => {
-          if (openId !== null) focusSoon(`candidate-${openId}`)
+          if (profileReturnFocus.current) focusSoon(profileReturnFocus.current)
           setOpenId(null)
         }}
         onMove={(stage) => open && moveCandidate(open.id, stage)}

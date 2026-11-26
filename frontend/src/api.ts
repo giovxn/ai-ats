@@ -33,6 +33,34 @@ export const STAGES: { id: Stage; label: string }[] = [
   { id: 'rejected', label: 'Rejected' },
 ]
 
+// Block 4: where each requirement shows up in the CV. Quotes come from the AI;
+// "verified" and "buried" are decided by plain code in the backend (evidence.py).
+export type EvidenceTag = 'duty' | 'action' | 'outcome'
+// Describes the CV, not the person. "unverified": the AI said the CV shows it, but none of its quotes
+// could be matched to the CV text, so it's never shown as found.
+export type EvidenceStatus = 'demonstrated' | 'partial' | 'not_found' | 'unverified'
+
+export type Quote = {
+  text: string
+  job_index: number | null // position in Candidate.jobs, most recent first; null for summary, skills...
+  tags: EvidenceTag[]
+  verified: boolean // found in the CV text, inside that job's section
+}
+
+export type RequirementEvidence = {
+  text: string
+  must_have: boolean
+  status: EvidenceStatus
+  quotes: Quote[]
+  buried: boolean // must-have with verified evidence only in jobs older than the last 2
+}
+
+export type Evidence = {
+  requirements: RequirementEvidence[]
+  highlight_tags: EvidenceTag[][][] // [job 1, job 2] -> tags per highlight
+  sections_found: boolean
+}
+
 export type Candidate = {
   id: number
   role_id: number
@@ -50,7 +78,29 @@ export type Candidate = {
   email: string | null
   phone: string | null
   links: string[] // LinkedIn, GitHub, a portfolio...
+  evidence_status: 'pending' | 'complete' | 'failed'
+  evidence: Evidence | null // only when evidence_status is "complete"
   created_at: string
+}
+
+export type PromptChoice = 'look_again' | 'reject_anyway'
+
+export type Decision = {
+  id: number
+  candidate_id: number
+  from_stage: Stage
+  to_stage: Stage
+  prompt_shown: boolean
+  prompt_choice: PromptChoice | null
+  undo_of: number | null
+  created_at: string
+}
+
+export type DecisionInput = {
+  to_stage: Stage
+  prompt_shown?: boolean
+  prompt_choice?: PromptChoice
+  undo_of?: number
 }
 
 // FastAPI errors are { detail: string } for our own errors,
@@ -99,5 +149,16 @@ export const api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stage }),
+    }),
+
+  // Block 4. Runs the evidence check again (e.g. it failed at upload).
+  checkEvidence: (id: number) => request<Candidate>(`/candidates/${id}/evidence`, { method: 'POST' }),
+
+  // Block 4. A Scan mode decision: moves the candidate (unless it's "Look again") and logs it.
+  decide: (id: number, input: DecisionInput) =>
+    request<{ candidate: Candidate; decision: Decision }>(`/candidates/${id}/decisions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
     }),
 }

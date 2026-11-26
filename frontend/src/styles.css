@@ -29,6 +29,17 @@
   --stage-rejected-bg: #efe2dd;
   --stage-rejected-dot: #b0614f;
 
+  /* Block 4. Each colour has one meaning. Sage: found in the CV. Amber: outside the 2 jobs on the
+     scan card. Measured: sage text 5.95:1, sage icon 3.65:1, amber text 5.81:1 on amber,
+     amber marker 3.17:1, body text 14.1:1 on amber. */
+  --color-positive: #4d6b38;
+  --color-positive-icon: #6b8f4e;
+  --color-muted-icon: #8c8478;
+  --color-attention-bg: #f6e7bd;
+  --color-attention-bg-soft: #fbf4e1;
+  --color-attention-text: #6e5410;
+  --color-attention-solid: #b08a2e;
+
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: ui-serif, "New York", Georgia, serif;
 
@@ -1045,4 +1056,704 @@ button.link-chip {
 
 .education-title {
   font-weight: 500;
+}
+
+/* ---------- Scan mode (Block 4) ----------
+   Full screen on a phone, a centred panel on larger screens. Header and decision buttons stay
+   put; only the card scrolls. */
+.section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scan {
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: var(--color-surface);
+  color: inherit;
+  overflow: hidden; /* only .scan-body scrolls */
+}
+
+.scan::backdrop {
+  background: rgb(28 26 23 / 0.35);
+}
+
+@media (min-width: 720px) {
+  .scan {
+    width: min(720px, calc(100% - 48px));
+    height: calc(100dvh - 48px);
+    margin: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-overlay);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scan[open] {
+    animation: dialog-in 200ms var(--ease-out);
+  }
+}
+
+.scan-layout {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+}
+
+/* Header: title, "3 / 10" and a thin progress line along its bottom edge. */
+.scan-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.scan-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.scan-title {
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.scan-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scan-progress strong {
+  font-weight: 600;
+}
+
+.scan-order {
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.scan-progress-bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -1px;
+  height: 2px;
+}
+
+.scan-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-solid);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scan-progress-bar span {
+    transition: scale 240ms var(--ease-out);
+  }
+}
+
+.scan-body {
+  position: relative; /* keeps absolutely positioned screen-reader text inside the scroller */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+}
+
+.scan-footer {
+  display: grid;
+  gap: 8px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-block-start: 1px solid var(--color-border);
+}
+
+.scan-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.scan-action {
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.scan-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+/* A quiet button for secondary actions (Skip, Undo): text with an underline. */
+.text-button {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--text-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.text-button[aria-disabled="true"] {
+  cursor: progress;
+}
+
+@media (hover: hover) {
+  .text-button:hover {
+    color: var(--color-text);
+  }
+}
+
+/* The card. A new candidate fades up 6px: short, because this happens dozens of times a session. */
+.scan-card {
+  display: grid;
+  gap: 24px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scan-card {
+    animation: scan-card-in 180ms var(--ease-out);
+  }
+}
+
+@keyframes scan-card-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+.scan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.scan-name {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.scan-name:focus {
+  outline: none; /* focused by code to announce the next candidate, never by Tab */
+}
+
+.scan-section .req-label {
+  margin-block-end: 10px;
+}
+
+.scan-note {
+  margin-block-start: 10px;
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+.scan-check-button {
+  margin-block-start: 8px;
+}
+
+/* Amber means one thing: outside the 2 jobs on this card. */
+.scan-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-block-start: -8px;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--color-attention-solid);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-attention-bg);
+}
+
+.scan-callout p {
+  flex: 1 1 18rem;
+}
+
+.scan-callout-title {
+  display: block;
+  font-size: var(--text-caption);
+  color: var(--color-attention-text);
+}
+
+.scan-callout-action {
+  color: var(--color-attention-text);
+}
+
+.badge-attention {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-attention-bg);
+  color: var(--color-attention-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Last 2 jobs: title and dates on one line, then 2 bullets with one label each in a fixed column,
+   so the eye runs down the labels (Outcome, Action, Duty) or the text. */
+.scan-jobs {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scan-job-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0 12px;
+}
+
+.scan-bullets {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scan-bullets li {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.bullet-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.scan-bullets li[data-tag="outcome"] .bullet-tag {
+  color: var(--color-positive);
+}
+
+/* Short snippets: 2 lines each. The full text is in the full profile. */
+.bullet-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+/* Must-haves: a checklist. Status is a shape and a word, never colour alone. */
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.checklist li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-block-end: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.checklist-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.35;
+}
+
+.checklist-status {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+.checklist li[data-status="demonstrated"] .checklist-status {
+  color: var(--color-positive);
+}
+
+.checklist li[data-status="not_found"] .checklist-text {
+  color: var(--color-text-secondary);
+}
+
+.status-icon {
+  flex-shrink: 0;
+  color: var(--color-muted-icon);
+}
+
+.status-icon[data-status="demonstrated"] {
+  color: var(--color-positive-icon);
+}
+
+@media (forced-colors: active) {
+  .status-icon {
+    color: CanvasText;
+  }
+}
+
+/* "Where the evidence is": closed by default. */
+.scan-evidence summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+}
+
+.scan-evidence summary::-webkit-details-marker {
+  display: none;
+}
+
+.scan-evidence[open] .chevron {
+  rotate: 180deg;
+}
+
+.scan-evidence-body {
+  display: grid;
+  gap: 20px;
+  margin-block-start: 8px;
+}
+
+/* The map: requirements down the side, jobs across, the 2 jobs on the card shaded. Text never
+   shrinks to fit: on a narrow screen with many jobs the map scrolls sideways inside its own area,
+   and the requirement column stays put. */
+.map-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.evidence-map {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-caption);
+}
+
+.evidence-map th,
+.evidence-map td {
+  padding: 6px 4px;
+  border-block-end: 1px solid var(--color-border);
+  font-weight: 400;
+}
+
+.evidence-map thead th,
+.evidence-map thead td {
+  border-block-end: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.evidence-map .map-groups th {
+  padding-block-end: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.evidence-map .map-corner {
+  text-align: start;
+}
+
+.evidence-map tbody th {
+  text-align: start;
+  padding-inline-end: 12px;
+}
+
+.evidence-map td {
+  width: 2rem;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.evidence-map tbody th,
+.evidence-map .map-corner,
+.evidence-map .map-groups td:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  min-width: 10rem;
+  background: var(--color-surface);
+  box-shadow: inset -1px 0 0 var(--color-border);
+}
+
+.evidence-map .map-section th {
+  position: static;
+  box-shadow: none;
+}
+
+/* The row spans the whole map; its label stays in view when the map is scrolled sideways. */
+.evidence-map .map-section th span {
+  position: sticky;
+  inset-inline-start: 4px;
+}
+
+.evidence-map .is-window {
+  background: var(--color-surface-sunken);
+}
+
+.evidence-map .map-groups .is-window {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.map-requirement {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.map-requirement .status-icon {
+  margin-block-start: 1px;
+}
+
+.evidence-map tr.is-buried th {
+  font-weight: 600;
+}
+
+.map-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-positive-icon);
+  vertical-align: middle;
+}
+
+.map-dot[data-older] {
+  width: 12px;
+  height: 12px;
+  background: var(--color-attention-solid);
+  box-shadow: 0 0 0 3px var(--color-attention-bg);
+}
+
+@media (forced-colors: active) {
+  .map-dot {
+    background: CanvasText;
+  }
+}
+
+.evidence-map .map-section th {
+  padding-block-start: 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Quotes grouped by job, in CV order. Older jobs carry the amber "Not on this card". */
+.quote-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.quote-group {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  scroll-margin-block: 16px;
+}
+
+.quote-group[data-older] {
+  border-color: var(--color-attention-solid);
+  background: var(--color-attention-bg-soft);
+}
+
+.quote-group:focus-visible {
+  outline-offset: 3px;
+}
+
+.quote-group-head {
+  margin-block-end: 10px;
+}
+
+.quote-group-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-end: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.quote-group-place .badge-attention {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.quote-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quote-list li {
+  display: grid;
+  gap: 3px;
+  justify-items: start;
+}
+
+.quote-for {
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.quote {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.quote mark {
+  padding: 0 2px;
+  border-radius: 2px;
+  background: var(--color-attention-bg);
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+@media (forced-colors: active) {
+  .quote mark {
+    background: Mark;
+    color: MarkText;
+  }
+}
+
+/* Evidence tags: text labels, so they never rely on colour. */
+.tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Outcomes are what the CV claims, not verified facts: a dashed edge says "claimed". */
+.tag[data-tag="outcome"] {
+  border-style: dashed;
+  border-color: var(--color-border-input);
+  color: var(--color-positive);
+}
+
+/* End of the queue. */
+.scan-done {
+  display: grid;
+  gap: 16px;
+}
+
+.scan-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+@media (min-width: 600px) {
+  .scan-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.scan-stats div {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--stage-bg);
+}
+
+.scan-stats dt {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+.scan-stats dd {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums; /* the serif's old-style 0 reads like an O */
+}
+
+/* "Before you reject": sits over Scan mode. */
+.check-dialog {
+  width: min(520px, calc(100% - 32px));
+}
+
+.check-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.check-list li {
+  padding: 12px 14px;
+  border-inline-start: 3px solid var(--color-attention-solid);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-attention-bg-soft);
+}
+
+.check-list .quote {
+  font-size: var(--text-body);
+}
+
+.check-requirement {
+  margin-block-end: 4px;
+  font-weight: 600;
 }
