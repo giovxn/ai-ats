@@ -4,7 +4,7 @@ A one-page, AI-native applicant tracking system. Its twist, **Beyond the Scan**,
 
 [Demo video (4:42)](https://drive.google.com/file/d/1t2sKdYOO2IhWdiJa9D-NzfCQUgASM9Bb/view?usp=sharing)
 
-<!-- Screenshot 1: Scan mode on Priya Raman, with the amber "Beyond the last 2 jobs" note -->
+![Before you reject: Priya Raman's Python and SQL experience sits in job 4 of 5, outside the 2 jobs on the card](docs/screenshots/before-you-reject.png)
 
 ## What it does
 
@@ -14,7 +14,14 @@ A one-page, AI-native applicant tracking system. Its twist, **Beyond the Scan**,
 * **Scan mode:** review new candidates one at a time, showing the last 2 jobs, like a recruiter's quick scan
 * **Before you reject:** if a must-have only appears in an older job, see the exact quote first, then Look again or Reject anyway
 
-<!-- Screenshot 2: "Before you reject" on Priya Raman -->
+<p>
+  <img src="docs/screenshots/board.png" width="49%" alt="Pipeline board with New, Shortlisted, Interview and Rejected columns">
+  <img src="docs/screenshots/profile.png" width="49%" alt="Candidate profile with contact details, skills and a job timeline">
+</p>
+<p>
+  <img src="docs/screenshots/scan-card.png" width="49%" alt="Scan mode card: the last 2 jobs with Outcome and Action labels, and a must-have checklist">
+  <img src="docs/screenshots/evidence-map.png" width="49%" alt="Where the evidence is: requirements against jobs, with the 2 jobs on the card shaded">
+</p>
 
 ## Why
 
@@ -38,7 +45,6 @@ Beyond the Scan finds where each requirement shows up, with an exact quote, and 
 
 ## Architecture
 
-<!-- Screenshot 3: "Where the evidence is" map on Priya Raman (amber dots in the Older columns) -->
 
 ```
 React (frontend/src)  ──/api──▶  FastAPI (backend/main.py)  ──▶  SQLite
@@ -94,7 +100,6 @@ npm run dev                       # http://localhost:5173
 
 **Demo:** pick **Full-Stack Software Engineer** and open **Scan mode**. Shortlist Layla (strong, recent evidence), reject James (no prompt), then try to reject Priya: her Python and SQL work sits in job 4 of 5. Run `reset_demo.py` again to start over.
 
-<!-- Screenshot 4: the pipeline board for the Full-Stack role -->
 
 ## Current limitations
 
