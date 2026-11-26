@@ -10,7 +10,8 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import cvs
-from schemas import Candidate, CVProfile, Role, RoleExtraction, Stage
+import evidence
+from schemas import Candidate, CVProfile, Decision, DecisionCreate, EvidenceState, Job, Role, RoleExtraction, Stage
 
 DB_PATH = Path(__file__).parent / "ats.db"
 
@@ -42,7 +43,22 @@ CREATE TABLE IF NOT EXISTS candidates (
     cv_text          TEXT NOT NULL,  -- the text extracted from the file
     cv_hash          TEXT NOT NULL,  -- fingerprint of cv_text, to spot the same CV uploaded twice
     created_at       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    evidence_status  TEXT NOT NULL DEFAULT 'pending'
+                     CHECK (evidence_status IN ('pending', 'complete', 'failed')),
+    evidence         TEXT,           -- JSON from evidence.from_extraction; NULL until complete
     UNIQUE (role_id, cv_hash)
+);
+
+-- Block 4: every Scan mode decision. Rows are only added: an undo is a new row pointing at the old one.
+CREATE TABLE IF NOT EXISTS decisions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    candidate_id  INTEGER NOT NULL REFERENCES candidates(id),
+    from_stage    TEXT NOT NULL,
+    to_stage      TEXT NOT NULL,
+    prompt_shown  INTEGER NOT NULL,  -- 0/1: the "Before you reject" check appeared
+    prompt_choice TEXT CHECK (prompt_choice IN ('look_again', 'reject_anyway')),
+    undo_of       INTEGER REFERENCES decisions(id),
+    created_at    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 """
 
@@ -71,6 +87,16 @@ def init_db() -> None:
         columns = [row["name"] for row in conn.execute("PRAGMA table_info(roles)")]
         if "excluded_criteria" not in columns:
             conn.execute("ALTER TABLE roles ADD COLUMN excluded_criteria TEXT NOT NULL DEFAULT '[]'")
+        # Block 4 columns, added to databases from Blocks 2 and 3. Existing candidates start as
+        # pending; backfill_evidence.py checks them.
+        columns = [row["name"] for row in conn.execute("PRAGMA table_info(candidates)")]
+        if "evidence_status" not in columns:
+            conn.execute(
+                "ALTER TABLE candidates ADD COLUMN evidence_status TEXT NOT NULL DEFAULT 'pending'"
+                " CHECK (evidence_status IN ('pending', 'complete', 'failed'))"
+            )
+        if "evidence" not in columns:
+            conn.execute("ALTER TABLE candidates ADD COLUMN evidence TEXT")
 
 
 # ---------- roles ----------
@@ -118,6 +144,12 @@ def _row_to_candidate(row: sqlite3.Row) -> Candidate:
     data["email"] = cvs.find_email(data["cv_text"])
     data["phone"] = cvs.find_phone(data["cv_text"])
     data["links"] = cvs.find_links(data["cv_text"])
+    # Quotes are verified and the buried rule applied on every read (plain code, no AI call).
+    stored = json.loads(data["evidence"]) if data["evidence"] else None
+    data["evidence"] = (
+        evidence.view(stored, data["cv_text"], [Job(**job) for job in data["jobs"]])
+        if stored and data["evidence_status"] == "complete" else None
+    )
     return Candidate(**data)
 
 
@@ -184,3 +216,75 @@ def update_stage(candidate_id: int, stage: Stage) -> Candidate | None:
         conn.execute("UPDATE candidates SET stage = ? WHERE id = ?", (stage, candidate_id))
         row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
     return _row_to_candidate(row) if row else None
+
+
+def save_evidence(candidate_id: int, status: EvidenceState, stored: dict | None) -> Candidate | None:
+    """Record the result of an evidence check. Only a complete check replaces the stored evidence."""
+    with get_db() as conn:
+        if stored is None:
+            conn.execute("UPDATE candidates SET evidence_status = ? WHERE id = ?", (status, candidate_id))
+        else:
+            conn.execute(
+                "UPDATE candidates SET evidence_status = ?, evidence = ? WHERE id = ?",
+                (status, json.dumps(stored), candidate_id),
+            )
+        row = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+    return _row_to_candidate(row) if row else None
+
+
+def candidates_without_evidence() -> list[Candidate]:
+    """Pending or failed: what backfill_evidence.py works through."""
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM candidates WHERE evidence_status != 'complete' ORDER BY id"
+        ).fetchall()
+    return [_row_to_candidate(row) for row in rows]
+
+
+# ---------- Block 4: decision log ----------
+
+class InvalidDecision(Exception):
+    """The decision doesn't fit the candidate's current state. The message is shown to the user."""
+
+
+def _row_to_decision(row: sqlite3.Row) -> Decision:
+    return Decision(**{**dict(row), "prompt_shown": bool(row["prompt_shown"])})
+
+
+def record_decision(candidate_id: int, body: DecisionCreate) -> tuple[Candidate, Decision] | None:
+    """Move the candidate and log it, in one transaction. None if there is no such candidate."""
+    with get_db() as conn:
+        row = conn.execute("SELECT stage FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+        if row is None:
+            return None
+        from_stage = row["stage"]
+        if body.prompt_choice == "look_again" and body.to_stage != from_stage:
+            raise InvalidDecision("Look again doesn't change the stage.")
+        if body.prompt_choice == "reject_anyway" and body.to_stage != "rejected":
+            raise InvalidDecision("Reject anyway must move the candidate to Rejected.")
+        if body.undo_of is not None:
+            undone = conn.execute(
+                "SELECT 1 FROM decisions WHERE id = ? AND candidate_id = ?", (body.undo_of, candidate_id)
+            ).fetchone()
+            if undone is None:
+                raise InvalidDecision("There's no such decision to undo for this candidate.")
+
+        conn.execute("UPDATE candidates SET stage = ? WHERE id = ?", (body.to_stage, candidate_id))
+        cursor = conn.execute(
+            "INSERT INTO decisions (candidate_id, from_stage, to_stage, prompt_shown, prompt_choice, undo_of)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            (candidate_id, from_stage, body.to_stage, int(body.prompt_shown), body.prompt_choice, body.undo_of),
+        )
+        decision = conn.execute("SELECT * FROM decisions WHERE id = ?", (cursor.lastrowid,)).fetchone()
+        candidate = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+    return _row_to_candidate(candidate), _row_to_decision(decision)
+
+
+def list_decisions(role_id: int) -> list[Decision]:
+    with get_db() as conn:
+        rows = conn.execute(
+            """SELECT decisions.* FROM decisions JOIN candidates ON candidates.id = decisions.candidate_id
+               WHERE candidates.role_id = ? ORDER BY decisions.id""",
+            (role_id,),
+        ).fetchall()
+    return [_row_to_decision(row) for row in rows]

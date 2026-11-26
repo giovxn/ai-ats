@@ -7,9 +7,21 @@ from fastapi import FastAPI, HTTPException, UploadFile
 
 import cvs
 import db
+import evidence
 import llm
 import prompts
-from schemas import Candidate, CVProfile, Role, RoleCreate, RoleExtraction, StageUpdate
+from schemas import (
+    Candidate,
+    CVProfile,
+    Decision,
+    DecisionCreate,
+    DecisionResult,
+    EvidenceExtraction,
+    Role,
+    RoleCreate,
+    RoleExtraction,
+    StageUpdate,
+)
 
 app = FastAPI(title="OVI ATS")
 db.init_db()
@@ -84,9 +96,16 @@ def upload_cv(role_id: int, file: UploadFile) -> Candidate:
 
     years = cvs.total_years(profile.jobs)
     try:
-        return db.create_candidate(role_id, profile, years, filename, text, cv_hash)
+        candidate = db.create_candidate(role_id, profile, years, filename, text, cv_hash)
     except db.DuplicateCV:
         raise HTTPException(status_code=409, detail="This CV is already uploaded to this role.")
+
+    # Block 4: a second AI call finds requirement evidence. If it fails, the candidate is still
+    # saved (evidence_status "failed") and the check can be retried.
+    try:
+        return check_evidence(candidate)
+    except llm.LLMError:
+        return db.get_candidate(candidate.id)
 
 
 @app.get("/api/roles/{role_id}/candidates")
@@ -113,3 +132,56 @@ def move_candidate(candidate_id: int, body: StageUpdate) -> Candidate:
     if candidate is None:
         raise HTTPException(status_code=404, detail="Candidate not found.")
     return candidate
+
+
+# ---------- Block 4: Beyond the Scan ----------
+
+def check_evidence(candidate: Candidate) -> Candidate:
+    """Ask the AI where each requirement shows up in the CV, and store it. Raises LLMError on failure
+    (after marking the candidate "failed"). Quotes are checked by code when the candidate is read."""
+    role = db.get_role(candidate.role_id)
+    try:
+        extraction = llm.extract(
+            prompts.EVIDENCE,
+            evidence.ai_input(role.requirements, candidate.jobs, candidate.cv_text),
+            EvidenceExtraction,
+        )
+    except llm.LLMError:
+        db.save_evidence(candidate.id, "failed", None)
+        raise
+    stored = evidence.from_extraction(extraction, role.requirements, candidate.jobs)
+    return db.save_evidence(candidate.id, "complete", stored)
+
+
+@app.post("/api/candidates/{candidate_id}/evidence")
+def retry_evidence(candidate_id: int) -> Candidate:
+    """Run the evidence check again, e.g. after it failed at upload."""
+    candidate = db.get_candidate(candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=404, detail="Candidate not found.")
+    try:
+        return check_evidence(candidate)
+    except llm.LLMError as error:
+        raise HTTPException(status_code=502, detail=str(error))
+
+
+@app.post("/api/candidates/{candidate_id}/decisions", status_code=201)
+def record_decision(candidate_id: int, body: DecisionCreate) -> DecisionResult:
+    """A Scan mode decision: moves the candidate (unless it's "Look again") and logs it, together."""
+    if body.prompt_choice and not body.prompt_shown:
+        raise HTTPException(status_code=422, detail="A prompt choice needs prompt_shown to be true.")
+    try:
+        result = db.record_decision(candidate_id, body)
+    except db.InvalidDecision as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    if result is None:
+        raise HTTPException(status_code=404, detail="Candidate not found.")
+    candidate, decision = result
+    return DecisionResult(candidate=candidate, decision=decision)
+
+
+@app.get("/api/roles/{role_id}/decisions")
+def list_decisions(role_id: int) -> list[Decision]:
+    if db.get_role(role_id) is None:
+        raise HTTPException(status_code=404, detail="Role not found.")
+    return db.list_decisions(role_id)
