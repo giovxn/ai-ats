@@ -2,7 +2,7 @@
 
 A one-page, AI-native applicant tracking system. Its twist, **Beyond the Scan**, makes sure a recruiter never rejects someone without seeing relevant experience outside the part of the CV they actually read.
 
-<!-- Screenshot 1: Scan mode on Rania Aziz, with the amber "Beyond the last 2 jobs" note -->
+<!-- Screenshot 1: Scan mode on Priya Raman, with the amber "Beyond the last 2 jobs" note -->
 
 ## What it does
 
@@ -12,7 +12,7 @@ A one-page, AI-native applicant tracking system. Its twist, **Beyond the Scan**,
 * **Scan mode:** review new candidates one at a time, showing the last 2 jobs, like a recruiter's quick scan
 * **Before you reject:** if a must-have only appears in an older job, see the exact quote first, then Look again or Reject anyway
 
-<!-- Screenshot 2: "Before you reject" on Rania Aziz or Daniel Mensah -->
+<!-- Screenshot 2: "Before you reject" on Priya Raman -->
 
 ## Why
 
@@ -36,7 +36,7 @@ Beyond the Scan finds where each requirement shows up, with an exact quote, and 
 
 ## Architecture
 
-<!-- Screenshot 3: "Where the evidence is" map on Rania Aziz (amber dots in the Older columns) -->
+<!-- Screenshot 3: "Where the evidence is" map on Priya Raman (amber dots in the Older columns) -->
 
 ```
 React (frontend/src)  ──/api──▶  FastAPI (backend/main.py)  ──▶  SQLite
@@ -75,7 +75,7 @@ All of it fails closed: if something can't be checked, the prompt doesn't appear
 
 ## Run locally
 
-Needs Python 3.11+ with [uv](https://docs.astral.sh/uv/), and Node 20+. **The demo needs no API key**: 18 fictional CVs with evidence already checked ship in `backend/demo.db`.
+Needs Python 3.11+ with [uv](https://docs.astral.sh/uv/), and Node 20+. **The demo needs no API key**: the demo role and its 9 fictional CVs, with evidence already checked, ship in `backend/demo.db`. The same job ad and CVs, as PDFs, are in [sample_data/demo](sample_data/demo) for a live run.
 
 ```bash
 cp .env.example .env              # add an OpenAI key, only needed for new roles and CVs
@@ -90,7 +90,7 @@ npm install
 npm run dev                       # http://localhost:5173
 ```
 
-**Demo:** pick **Full-Stack Software Engineer** and open **Scan mode**. Reject Ahmed (no prompt), shortlist Tomás, then try to reject Daniel or Rania: their Python and SQL work sits in an older job. Run `reset_demo.py` again to start over.
+**Demo:** pick **Full-Stack Software Engineer** and open **Scan mode**. Shortlist Layla (strong, recent evidence), reject James (no prompt), then try to reject Priya: her Python and SQL work sits in job 4 of 5. Run `reset_demo.py` again to start over.
 
 <!-- Screenshot 4: the pipeline board for the Full-Stack role -->
 

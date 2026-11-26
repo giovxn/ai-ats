@@ -1,0 +1,36 @@
+Full-Stack Software Engineer
+Tallyway | Dubai, UAE | Hybrid, 3 days in office
+
+About Tallyway
+Tallyway builds invoicing and cash-flow software for small businesses across the Gulf. We are 40 people, Series A, and our product handles over 2 million invoices a month.
+
+The role
+You'll join a team of six engineers and own features end to end: from the database schema to the React screen a shop owner taps on their phone. You'll work closely with product and design, ship every week, and help us keep the codebase simple as we grow.
+
+What you'll do
+- Build and ship product features across our React frontend and Python (FastAPI) backend
+- Design PostgreSQL schemas and write efficient queries
+- Review code and help set engineering standards
+- Talk to customers with our product team to understand problems before solving them
+- Keep our CI, tests and monitoring healthy
+
+What we're looking for
+- 4+ years of professional software engineering experience
+- Strong TypeScript and React
+- Solid backend experience in Python (FastAPI, Django or Flask)
+- Comfortable with SQL and relational databases (PostgreSQL preferred)
+- Experience with cloud infrastructure (AWS or GCP)
+- Writes clear, tested code and communicates well in English
+- Preferred age 25 to 35
+
+Nice to have
+- Experience with fintech, payments or accounting software
+- Arabic language skills
+- Experience with Docker and Kubernetes
+- Contributions to open-source projects
+
+What we offer
+- Competitive salary plus equity
+- Annual flight home and 25 days of leave
+- Health insurance for you and your family
+- Learning budget of AED 5,000 per year
