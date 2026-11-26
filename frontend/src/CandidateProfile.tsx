@@ -129,9 +129,13 @@ const SITE_NAMES: Record<string, string> = {
 
 // LinkedIn and GitHub show their icon; any other site shows its name or address
 // ("jdoe.dev"): code can't tell a portfolio from a former employer's website.
+// A page below the home page adds its last path part, so several project pages on one
+// portfolio stay apart: "jdoe.dev", "jdoe.dev/weatherfit", "jdoe.dev/dashboard".
 function SiteLink({ url }: { url: string }) {
-  const host = new URL(url).hostname.replace(/^www\./, '')
-  const name = SITE_NAMES[host] ?? host
+  const parsed = new URL(url)
+  const host = parsed.hostname.replace(/^www\./, '')
+  const page = parsed.pathname.split('/').filter(Boolean).at(-1)
+  const name = SITE_NAMES[host] ?? (page ? `${host}/${decodeURIComponent(page)}` : host)
   const icon = SITE_ICONS[host]
   return icon ? (
     <a
@@ -147,7 +151,7 @@ function SiteLink({ url }: { url: string }) {
       </svg>
     </a>
   ) : (
-    <a className="link-chip" href={url} target="_blank" rel="noopener noreferrer">
+    <a className="link-chip" href={url} target="_blank" rel="noopener noreferrer" title={url}>
       {name}
       <span className="visually-hidden"> (opens in a new tab)</span>
     </a>

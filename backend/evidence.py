@@ -87,14 +87,9 @@ class CVText:
 
 # ---------- job sections ----------
 
-def find_sections(cv: CVText, jobs: list[Job]) -> list[tuple[int, int]] | None:
-    """Each job's (start, end) in cv.text, or None if any job can't be found.
-
-    Jobs are searched in order, each after the previous one, by company first (rarely in a
-    headline) and then title. Searching in order keeps two jobs at the same company apart.
-    A section starts at the beginning of the line where its job is found ("Frontend Engineer, ShopSphere"),
-    and ends at the next job or the next known heading.
-    """
+def _anchors_in_order(cv: CVText, jobs: list[Job]) -> list[int] | None:
+    """Each job searched after the previous one (most recent first, as most CVs are written), by
+    company first (rarely in a headline) and then title. This keeps two jobs at the same company apart."""
     anchors, position = [], 0
     for job in jobs:
         found = -1
@@ -104,11 +99,39 @@ def find_sections(cv: CVText, jobs: list[Job]) -> list[tuple[int, int]] | None:
                 if found >= 0:
                     break
         if found < 0:
-            return None  # e.g. CVs listing the oldest job first: fail closed
+            return None
         anchors.append(cv.line_start(found))
         position = found + 1
+    return anchors
 
-    boundaries = sorted(set(anchors[1:] + cv.headings + [len(cv.text)]))
+
+def _anchors_unique(cv: CVText, jobs: list[Job]) -> list[int] | None:
+    """For CVs not written most recent first (oldest first, or projects before jobs): each job is
+    placed only where its company or title appears exactly once. Anything ambiguous fails closed."""
+    anchors = []
+    for job in jobs:
+        found = None
+        for key in (job.company, job.title):
+            hits = cv.find_all(_normalise(key)) if key and _normalise(key) else []
+            if len(hits) == 1:
+                found = hits[0]
+                break
+        if found is None:
+            return None
+        anchors.append(cv.line_start(found))
+    return anchors if len(set(anchors)) == len(anchors) else None
+
+
+def find_sections(cv: CVText, jobs: list[Job]) -> list[tuple[int, int]] | None:
+    """Each job's (start, end) in cv.text, or None if the jobs can't be placed with confidence.
+
+    A section starts at the beginning of the line where its job is found ("Frontend Engineer, ShopSphere"),
+    and ends at the next job (in text order) or the next known heading.
+    """
+    anchors = _anchors_in_order(cv, jobs) or _anchors_unique(cv, jobs)
+    if anchors is None:
+        return None
+    boundaries = sorted(set(anchors + cv.headings + [len(cv.text)]))
     return [(start, min(b for b in boundaries if b > start)) for start in anchors]
 
 
@@ -186,12 +209,12 @@ def _is_buried(quotes: list[QuoteView], raw_quotes: list[dict], cv: CVText,
     # (An unverified quote with no job, like a one-word skill, says nothing about where evidence sits.)
     # Recent evidence anywhere wins, whichever job the AI named: if any quote also occurs inside the
     # last 2 jobs' text (e.g. the same sentence in jobs 1 and 4), the recruiter can see it.
-    recent_start, recent_end = sections[0][0], sections[RECENT_JOBS][0]
+    recent = sections[:RECENT_JOBS]
     for raw in raw_quotes:
         phrase = _normalise(raw["text"])
         if len(phrase.split()) < MIN_QUOTE_WORDS:
             continue  # a single word like "python" shows up everywhere and proves nothing
-        if any(recent_start <= s < recent_end for s in cv.find_all(phrase)):
+        if any(start <= s < end for s in cv.find_all(phrase) for start, end in recent):
             return False
     return any(q.job_index is not None and q.job_index >= RECENT_JOBS for q in quotes)
 

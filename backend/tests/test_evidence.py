@@ -307,3 +307,60 @@ def test_evidence_stored_with_the_old_tag_name_reads_as_duty():
     result = evidence.view(stored, CV, JOBS)
     assert result.requirements[0].quotes[0].tags == ["duty"]
     assert result.highlight_tags == [[["duty", "action"]], []]
+
+
+# ---------- CVs not written most recent first ----------
+
+OLDEST_FIRST_CV = """\
+Education
+BSc Computer Science, Example University, 2018
+
+Experience
+Backend Developer, Delta Systems                   2016 – 2019
+- Built Django REST APIs on PostgreSQL for three clients
+- Wrote React dashboards for the support team
+Engineer, Beta Ltd                                 2019 – 2023
+- Built dashboards in React for the sales team
+Senior Engineer, Alpha Co (Dubai)                  2023 – Present
+- Built React and TypeScript screens for the billing app
+- Wrote React dashboards for the support team
+
+Skills
+Python, Django, React
+"""
+
+OLDEST_FIRST_JOBS = [  # parsed most recent first, as the CV parser always returns them
+    Job(title="Senior Engineer", company="Alpha Co", start="2023", end=None, is_current=True, highlights=[]),
+    Job(title="Engineer", company="Beta Ltd", start="2019", end="2023", is_current=False, highlights=[]),
+    Job(title="Backend Developer", company="Delta Systems", start="2016", end="2019", is_current=False, highlights=[]),
+]
+
+
+def test_oldest_first_cv_is_matched_job_by_job():
+    cv = CVText(OLDEST_FIRST_CV)
+    sections = find_sections(cv, OLDEST_FIRST_JOBS)
+    assert sections is not None
+    assert verify_quote("Built React and TypeScript screens", 0, cv, sections)
+    assert verify_quote("Built Django REST APIs on PostgreSQL", 2, cv, sections)
+    assert not verify_quote("Built Django REST APIs on PostgreSQL", 0, cv, sections)
+    assert not verify_quote("Python, Django, React", 0, cv, sections)  # the skills list after the last entry
+
+
+def test_oldest_first_cv_still_finds_buried_evidence():
+    result = check([quote("Built Django REST APIs on PostgreSQL", 3)], cv=OLDEST_FIRST_CV, jobs=OLDEST_FIRST_JOBS)
+    assert result.quotes[0].verified
+    assert result.buried
+
+
+def test_oldest_first_cv_same_quote_in_a_recent_job_is_not_buried():
+    # The sentence is in job 3 (first in the text) and job 1 (last in the text).
+    result = check([quote("Wrote React dashboards for the support team", 3)], cv=OLDEST_FIRST_CV, jobs=OLDEST_FIRST_JOBS)
+    assert result.quotes[0].verified
+    assert not result.buried
+
+
+def test_out_of_order_cv_with_a_repeated_company_fails_closed():
+    cv = CVText(OLDEST_FIRST_CV.replace("Beta Ltd", "Alpha Co"))
+    jobs = [OLDEST_FIRST_JOBS[0], OLDEST_FIRST_JOBS[1].model_copy(update={"company": "Alpha Co"}), OLDEST_FIRST_JOBS[2]]
+    # "Alpha Co" appears twice and both titles contain "Engineer": nothing places the jobs with confidence.
+    assert find_sections(cv, jobs) is None
