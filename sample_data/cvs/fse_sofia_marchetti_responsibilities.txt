@@ -1,0 +1,40 @@
+SOFIA MARCHETTI
+Full-Stack Developer
+Dubai, UAE - sofia.marchetti@example.com - +971 52 000 0013
+
+PROFESSIONAL SUMMARY
+Full-stack developer with five years of experience in web applications for insurance and retail.
+Team player with good communication skills.
+
+WORK EXPERIENCE
+
+Full-Stack Developer - Covera Insurance, Dubai
+June 2023 - Present
+- Responsible for the development and maintenance of the claims portal
+- Responsible for backend services written in Python with Django
+- Involved in the frontend migration to React and TypeScript
+- Participated in code reviews and wrote unit tests for new features
+- Worked with the DevOps team on deployments to AWS
+- Worked with PostgreSQL databases and wrote SQL queries for reports
+
+Web Developer - Marlow Retail Group, Dubai
+March 2021 - May 2023
+- Responsible for the company's e-commerce website
+- Involved in the development of REST APIs with Python and Flask
+- Worked on React components for the product pages
+- Participated in sprint planning and daily stand-ups
+- Supported the testing team during releases
+
+Junior Developer - Nexa Solutions, Milan
+September 2019 - February 2021
+- Involved in the maintenance of internal tools written in Java
+- Participated in the migration of a MySQL database
+
+EDUCATION
+BSc Computer Science, University of Milan, 2019
+
+SKILLS
+Python, Django, Flask, React, TypeScript, JavaScript, PostgreSQL, MySQL, Java, AWS, Git
+
+LANGUAGES
+Italian (native), English (fluent)

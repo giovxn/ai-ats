@@ -8,8 +8,10 @@ __pycache__/
 *.pyc
 backend/.venv/
 
-# Local database
+# Local database. demo.db is the exception: the clean demo copy (fictional sample data only),
+# restored by backend/reset_demo.py.
 *.db
+!backend/demo.db
 
 # Node
 node_modules/

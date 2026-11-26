@@ -1,0 +1,35 @@
+Daniel Mensah
+Mobile and Frontend Engineer
+Dubai, UAE  |  daniel.mensah@example.com  |  +971 55 000 0012  |  github.com/example-dm
+
+Summary
+Mobile and frontend engineer building consumer apps in React Native and TypeScript. Before
+moving to the client side I spent three years building backend services.
+
+Experience
+
+Senior Mobile Engineer | Ferrow Mobility | Dubai | 2022 - present
+* Lead development of the rider app in React Native and TypeScript (iOS and Android)
+* Built the in-app payments flow with the payments team; checkout errors fell by 30%
+* Added Detox end-to-end tests and Jest unit tests to the release pipeline
+* Ship over-the-air updates through AWS Amplify and monitor crashes with Sentry
+
+Frontend Engineer | Lumo Health | Dubai | 2019 - 2022
+* Built the patient booking web app in React and TypeScript
+* Wrote unit and integration tests with React Testing Library for every new screen
+* Deployed the web app to AWS S3 and CloudFront with GitHub Actions
+
+Backend Developer | Kestrel Software | Accra, Ghana | 2016 - 2019
+* Built REST APIs in Python with Flask and SQLAlchemy for school management software
+* Wrote the PostgreSQL migrations and reporting queries for 200 partner schools
+* Added pytest tests and a CI pipeline for the API
+
+Education
+BSc Computer Engineering, Kwame Nkrumah University of Science and Technology, 2016
+
+Skills
+React Native, React, TypeScript, JavaScript, Python, Flask, SQLAlchemy, PostgreSQL, AWS, Jest,
+Detox, GitHub Actions
+
+Languages
+English (fluent), Twi (native)

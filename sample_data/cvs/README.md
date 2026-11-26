@@ -26,6 +26,15 @@ Extra formats, added after researching common CV layouts:
 | `fse_tomas_ribeiro_europass.pdf` | Full-Stack Engineer | Strong-to-partial: Python and payments, light React, relocating | EU Europass layout: dates as `dd/mm/yyyy` (some split over two lines), an internship, a CEFR language table, running header and footer, date of birth and gender (must not be extracted) |
 | `fse_omar_farouk_functional.txt` | Full-Stack Engineer | Partial: right skills, unclear history | Functional (skills-first) CV: achievements grouped by skill, two jobs with no dates, a labelled career break (not a job). Years of experience can only count the one dated job |
 
+Block 4 (Beyond the Scan) demo CVs, written so the "Before you reject" check has something to find:
+
+| File | Role | Intended fit | What it tests |
+|---|---|---|---|
+| `fse_rania_aziz_long.pdf` | Full-Stack Engineer | Strong frontend lead; Python backend and SQL only in job 4 of 5 (2015–2018) | 4-page PDF with wrapped lines. Must-have evidence buried outside the last 2 jobs: the check appears |
+| `fse_daniel_mensah_backend_earlier.txt` | Full-Stack Engineer | Mobile and frontend now; Python (Flask) and PostgreSQL only in job 3 of 3 | Same as above in a short CV with `*` bullets and year-only dates |
+| `fse_sofia_marchetti_responsibilities.txt` | Full-Stack Engineer | Right stack in recent jobs, almost no stated results | "Responsible for… / Involved in…" bullets: Duty labels, no Outcome labels |
+| `fse_jiwoo_park_nice_to_have_earlier.txt` | Full-Stack Engineer | Must-haves in recent jobs; Kubernetes and payments only in older jobs | Nice-to-haves outside the last 2 jobs never trigger the check. Two jobs at the same company |
+
 `edge_cases/` holds files that must be rejected with a clear message:
 
 | File | Expected result |
